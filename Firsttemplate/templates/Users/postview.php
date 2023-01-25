@@ -38,15 +38,28 @@
                 </div>
                
             </table>
-            <?php foreach ($post->users_comment as $posts): ?>
             <table>
-                <tr>                
+            <tr>
+                <th>Comment Name</th>
+                <th>Comment</th>
+                <th>Comment Time</th>
+                <th class="actions"><?= __('Actions') ?></th>
+
+                
+            </tr>
+            <?php foreach ($post->users_comment as $posts): ?>
+            <tr>                
+                    <td><?= h($posts->name) ?></td>
                     <td><?= h($posts->comment) ?></td>
+                    <td><?= h($posts->comment_time) ?></td>
+                   <td> <?= $this->Form->postLink(_('Delete'), [ 'action' => 'commentDelete',$posts->id, $post->id], ['confirm' => _('Are you sure you want to delete # {0}?')]) ?></td>
+
+
                     
                 </tr>
 
+                <?php endforeach; ?>
             </table>
-            <?php endforeach; ?>
 
             <?= $this->Form->create($comment) ?>
             <fieldset>

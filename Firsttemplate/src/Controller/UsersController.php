@@ -64,6 +64,9 @@ class UsersController extends AppController
 
         $this->set(compact('users'));
     }
+
+            //---------------------------------Login--------------------------------//
+
     public function login()
     {
         
@@ -94,41 +97,8 @@ class UsersController extends AppController
         }
         // die;
     }
+            //---------------------------------View--------------------------------//
 
-    /**
-     * View method
-     *
-     * @param string|null $id User id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    // public function view($id = null)
-    // {
-    //     $user = $this->Users->get($id, [
-    //         'contain' => ['UsersPost','UsersComment'],
-    //     ]);
-    //     $user['post_id'] = $id;
-    //     // echo '<pre>';
-    //     // print_r($user);
-    //     //      die;
-
-    //     $comment = $this->UsersComment->newEmptyEntity();
-    //     if ($this->request->is(['patch', 'post', 'put'])) {
-    //         $data = $this->request->getData();
-    //         $data['post_id'] = $id;
-    //         $comment = $this->UsersComment->patchEntity($comment, $data);
-    //         // echo '<pre>';
-    //         // print_r($comment);
-    //         // die;
-    //         if ($this->UsersComment->save($comment)) {
-    //             $this->Flash->success(__('The comment has been saved.'));
-    //             return $this->redirect(['action' => 'view', $id]);
-    //         }
-           
-    //         $this->Flash->error(__('The comment could not be saved. Please, try again.'));
-    //     }
-    //     $this->set(compact('user','comment'));
-    // }
     public function view($id = null)
     {
         $user = $this->Users->get($id, [
@@ -138,11 +108,10 @@ class UsersController extends AppController
         $this->set(compact('user'));
     }
 
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
-     */
+  
+        //---------------------------------Add--------------------------------//
+
+
     public function add()
     {
         $result = $this->Authentication->getResult();
@@ -173,6 +142,10 @@ class UsersController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
+
+                     //----------------------------Edit-----------------------//
+
+
     public function edit($id = null)
     {
         $user = $this->Users->get($id, [
@@ -200,6 +173,10 @@ class UsersController extends AppController
      * @return \Cake\Http\Response|null|void Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
+
+                 //----------------------------Delete-----------------------//
+
+
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
@@ -223,38 +200,10 @@ class UsersController extends AppController
     }
 
 
-    //------------------Users-----Post-----Table-----------------------//
-
-    // public function post($$uc_id)
-    // {
-        
-    //         $user = $this->UsersPost->newEmptyEntity();
-    //     $user['$uc_id'] = $$uc_id;
-    //         if ($this->request->is('post')) {
-    //             $user = $this->UsersPost->patchEntity($user);
-    //             if (!$user->getErrors) {
-    //                 $image = $this->request->getData('images');
-    //                 $name = $image->getClientFilename();
-    //                 $targetPath = WWW_ROOT . 'img' . DS . $name;
-    //                 // debug($image);
-    //                 // exit;
-    //                 if ($name)
-    //                     $image->moveTo($targetPath);
-    //                 $user->image = $name;
-                    
     
-    //             }
-    //         // dd($user);
-    //             if ($this->UsersPost->save($user)) {
-    //                 $this->Flash->success(__('The user has been saved.'));
+                    //----------------------------Post Insert-----------------------//
 
-    //                 return $this->redirect(['action' => 'index']);
-    //             }
-               
-    //             $this->Flash->error(__('The user could not be saved. Please, try again.'));
-    //         }
-    //         $this->set(compact('user'));
-    //     }
+
         public function post($uc_id=null)
         {
         // echo $uc_id;
@@ -263,6 +212,9 @@ class UsersController extends AppController
           
             if ($this->request->is('post')) {
                 $post['uc_id'] = $uc_id;
+                // echo '<pre>';
+                //     print_r($uc_id);
+                //  die;
             
                 $data = $this->request->getData();
                 $productImage = $this->request->getData("images");
@@ -270,9 +222,6 @@ class UsersController extends AppController
                 $fileSize = $productImage->getSize();
                 $data["image"] = $fileName;
                 $data['uc_id'] = $uc_id;
-            // echo '<pre>';
-            //     print_r($data);
-            //  die;
                 $post = $this->UsersPost->patchEntity($post, $data);
              
                 if ($this->UsersPost->save($post)) {
@@ -301,10 +250,13 @@ class UsersController extends AppController
             $this->set(compact('post'));
         }
 
-
+            //----------------------------Post View && Comment Delete-----------------------//
 
 
         public function postview($id=null,$uc_id=null){
+
+            $user = $this->Authentication->getIdentity();
+            $this->set(compact('user'));
 
             $post = $this->UsersPost->get($id, [
                 'contain' => ['UsersComment'],
@@ -322,6 +274,9 @@ class UsersController extends AppController
                 
                 $comment = $this->UsersComment->patchEntity($comment,$data);
                 $comment['post_id']= $id;
+                $comment['name']=$user->first_name;
+                // print_r($comment);
+                // die;
                 
                 if ($this->UsersComment->save($comment)) {
         
@@ -339,7 +294,11 @@ class UsersController extends AppController
             $this->set(compact('post','comment'));  
         
            }
-           public function commentDelete($id = null ,$userid=null)
+
+            //----------------------------Delete Comment-----------------------//
+
+
+           public function commentDelete($id = null ,$postid=null)
            {
             // die($userid);
                $this->request->allowMethod(['post', 'delete']);
@@ -350,7 +309,7 @@ class UsersController extends AppController
                    $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
                }
        
-               return $this->redirect(['action' => 'view',$userid]);
+               return $this->redirect(['action' => 'postview',$postid]);
            }
            
     }

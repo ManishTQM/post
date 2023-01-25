@@ -25,5 +25,6 @@ class UsersComment extends Entity
     protected $_accessible = [
         'comment' => true,
         'post_id' => true,
+        'name' => true,
     ];
 }

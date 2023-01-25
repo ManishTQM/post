@@ -77,13 +77,7 @@
                         <th><?= __('Updated Time') ?></th>
                         <td><?= h($user->updated_time) ?></td>
                     </tr>
-                    <tr>
-                      <th><?= __('POST NAME') ?></th>  
-                      <?php foreach($user->users_post as $post):?>              
-                     <td><?= h($post->post_name) ?></td>
-                     <?php endforeach; ?>
-    
-                 </tr>
+                  
                  <!-- <tr>
                       <th><?= __('Image') ?></th>  
                       <?php foreach($user->users_post as $post):?>              
@@ -91,7 +85,7 @@
                      <?php endforeach; ?>
                  </tr> -->
                  </table>
-                 <div class="related">
+                 <!-- <div class="related">
                 <h4><?= __('Related Comments') ?></h4>
                 <div class="table-responsive">
                     <table>
@@ -102,7 +96,7 @@
                             <th><?= __('Comment time') ?></th>
                             <th class="actions"><?= __('Actions') ?></th>
                         </tr>
-                        <?php foreach($user['users_comment'] as $post):?>              
+                        <?php foreach($user->users_comment as $post):?>              
                         <tr>
                        <td><?= h($post->id);?></td>
                        <td><?= h($post->post_id);?></td>
@@ -118,7 +112,7 @@
                         <?php endforeach; ?>
                     </table>
                 </div>
-            </div>
+            </div> -->
                   <div class="related">
                 <h4><?= __('Related Posts') ?></h4>
                 <?php if (!empty($user->users_post)) : ?>
@@ -140,7 +134,7 @@
                             <td><?= h($posts->image) ?></td>
                             
                             <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'Users','action' => 'postview', $posts->uc_id]) ?>
+                                <?= $this->Html->link(__('View'), ['controller' => 'Users','action' => 'postview', $posts->id]) ?>
                                 <?= $this->Html->link(__('Edit'), ['controller' => 'Posts', 'action' => 'edit', $posts->id]) ?>
                                 <?= $this->Html->link(__('Delete'), ['controller' => 'Posts', 'action' => 'delete', $posts->id]) ?>
                                 <!-- <?= $this->Form->postLink(_('Delete'), ['controller' => 'Posts', 'action' => 'delete', $posts->id], ['confirm' => _('Are you sure you want to delete # {0}?', $posts->id)]) ?> -->
