@@ -134,7 +134,7 @@ class UsersController extends AppController
             return $this->redirect(['action' => 'index']);
         }
     }
-
+dsddgfgfg
     /**
      * Edit method
      *
@@ -298,7 +298,7 @@ class UsersController extends AppController
             //----------------------------Delete Comment-----------------------//
 
 
-           public function commentDelete($id = null ,$postid=null)
+           public function commentDelete($id = null ,$uc_id=null)
            {
             // die($userid);
                $this->request->allowMethod(['post', 'delete']);
@@ -309,7 +309,7 @@ class UsersController extends AppController
                    $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
                }
        
-               return $this->redirect(['action' => 'postview',$postid]);
+               return $this->redirect(['action' => 'postview',$uc_id]);
            }
            
     }
