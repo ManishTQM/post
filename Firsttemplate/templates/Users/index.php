@@ -18,6 +18,10 @@
         'style'
           
         ]) ?>
+        <?php $session = $this->request->getSession();
+echo $session->read('name');
+error_reporting(0);
+ ?>
 <div class="users index content">
     <h3><?= __('Users') ?></h3>
     <div class="table-responsive">

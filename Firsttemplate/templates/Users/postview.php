@@ -52,7 +52,7 @@
                     <td><?= h($posts->name) ?></td>
                     <td><?= h($posts->comment) ?></td>
                     <td><?= h($posts->comment_time) ?></td>
-                   <td> <?= $this->Form->postLink(_('Delete'), [ 'action' => 'commentDelete',$posts->id, $post->id], ['confirm' => _('Are you sure you want to delete # {0}?')]) ?></td>
+                   <td> <?= $this->Form->postLink(_('Delete'), [ 'action' => 'commentDelete',$posts->id, $post->id], ['confirm' => _('Are you sure you want to delete # {0}?'),$post->id]) ?></td>
 
 
                     

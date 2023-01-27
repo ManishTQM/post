@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 namespace App\Controller;
-
+use Phinx\Db\Action\Action;
+use Cake\ORM\TableRegistry;
 /**
  * Users Controller
  *
@@ -11,6 +12,27 @@ namespace App\Controller;
  */
 class UsersController extends AppController
 {
+    private function getFileExt($mime_type){
+        $mimetypeArr = [
+            'application/pdf' => '.pdf',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => '.xlsx',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => '.docx',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => '.pptx',
+            'application/vnd.ms-excel' => '.xls',
+            'application/msword' => '.doc',
+            'application/vnd.ms-powerpoint' => '.ppt',
+            'image/bmp' => '.bmp',
+            'image/gif' => '.gif',
+            'image/png' => '.png',
+            'image/x-citrix-png' => '.png',
+            'image/x-png' => '.png',
+            'image/jpeg' => '.jpg',
+            'image/x-citrix-jpeg' => '.jpg'
+        ];
+
+        return $mimetypeArr[$mime_type];
+    }
+
     public function initialize(): void
     {
         parent::initialize();
@@ -59,10 +81,16 @@ class UsersController extends AppController
     // }
     public function index()
     {
-        
-        $users = $this->paginate($this->Users);
+        $result = $this->Authentication->getIdentity();
 
-        $this->set(compact('users'));
+        if ($result->role == 0) {
+            $users = $this->paginate($this->Users);
+
+            $this->set(compact('users'));
+        }else{
+            $this->redirect(['Controller'=>'Users','action'=>'userview']);
+            }
+       
     }
 
             //---------------------------------Login--------------------------------//
@@ -78,16 +106,34 @@ class UsersController extends AppController
 
         // regardless of POST or GET, redirect if user is logged in
         if ($result && $result->isValid()) {
-            
             $email = $this->request->getData('email');
             // echo $email;
+            $users = TableRegistry::get("Users");
+            $data = $users->find('all')->where(['email' => $email])->first();
+            // print_r($data->first_name);
+            // die;
             $session = $this->getRequest()->getSession();
-            $session->write('email', $email);
+            $session->write('name', $data->first_name);
+
+            $result = $this->Authentication->getIdentity();
+            if ($result->role == '0') {
+
+                $redirect = $this->request->getQuery('redirect', [
+                    'controller' => 'users',
+                    'action' => 'index',
+                ]);
+                   
+                }else{
+                    $redirect = $this->request->getQuery('redirect', [
+                        'controller' => 'users',
+                        'action' => 'userview',
+                    ]);
+
+                }
+            
+               
             // redirect to /articles after login success
-            $redirect = $this->request->getQuery('redirect', [
-                'controller' => 'users',
-                'action' => 'index',
-            ]);
+           
 
             return $this->redirect($redirect);
         }
@@ -97,7 +143,7 @@ class UsersController extends AppController
         }
         // die;
     }
-            //---------------------------------View--------------------------------//
+            //---------------------------------AdminView--------------------------------//
 
     public function view($id = null)
     {
@@ -107,6 +153,23 @@ class UsersController extends AppController
 
         $this->set(compact('user'));
     }
+     //---------------------------------UsersView--------------------------------//
+
+              public function userview($id = null)
+              {
+                $result = $this->Authentication->getIdentity();
+                if ($result->role == '0') {
+                  $user = $this->Users->get($id, [
+                 'contain' => ['UsersPost','UsersComment'],
+                  ]);
+              }else{
+                   $user = $this->Users->get($result->id, [
+                    'contain' => ['UsersPost','UsersComment'],
+                ]);
+                $users = $this->paginate($this->UsersPost);
+                $this->set(compact('user','users'));
+            }
+            }
 
   
         //---------------------------------Add--------------------------------//
@@ -134,7 +197,7 @@ class UsersController extends AppController
             return $this->redirect(['action' => 'index']);
         }
     }
-dsddgfgfg
+
     /**
      * Edit method
      *
@@ -160,9 +223,6 @@ dsddgfgfg
             }
             $this->Flash->error(__('The user could not be saved. Please, try again.'));
         }
-        // echo '<pre>';
-        // print_r($user);
-        // die();
         $this->set(compact('user'));
     }
 
@@ -189,19 +249,23 @@ dsddgfgfg
 
         return $this->redirect(['action' => 'index']);
     }
+
+                     //----------------------------Logout-----------------------//
+
+
     public function logout()
     {
         $result = $this->Authentication->getResult();
         // regardless of POST or GET, redirect if user is logged in
         if ($result->isValid()) {
-            $this->Authentication->logout();
-            $this->redirect(['controller'=>'user','action' => 'index']);
-        }
-    }
+                $this->Authentication->logout();
+                $session = $this->request->getSession();
+                $session->destroy();
+                return $this->redirect(['action' => 'login']);
+            }
+            }
 
-
-    
-                    //----------------------------Post Insert-----------------------//
+            //----------------------------Post Insert-----------------------//
 
 
         public function post($uc_id=null)
@@ -250,7 +314,7 @@ dsddgfgfg
             $this->set(compact('post'));
         }
 
-            //----------------------------Post View && Comment Delete-----------------------//
+            //----------------------------Post View && Comment -----------------------//
 
 
         public function postview($id=null,$uc_id=null){
@@ -300,17 +364,98 @@ dsddgfgfg
 
            public function commentDelete($id = null ,$uc_id=null)
            {
-            // die($userid);
+               // die($userid);
+               
                $this->request->allowMethod(['post', 'delete']);
+               $result = $this->Authentication->getIdentity();
                $comment = $this->UsersComment->get($id);
-               if ($this->UsersComment->delete($comment)) {
-                   $this->Flash->success(__('The comment has been deleted.'));
-               } else {
+               if ($result->role == 0) {
+                //    print_r($comment);
+                //    die;
+                   if ($this->UsersComment->delete($comment)) {
+                       $this->Flash->success(__('The comment has been deleted.'));
+                       return $this->redirect(['action' => 'postview',$uc_id]);
+                       
+                    }
+                else {
                    $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
                }
-       
+            }else{
+                $result = $this->Authentication->getIdentity();
+                if ($result->role == 1) {
+                    $comment = $this->UsersComment->get($result->id);
+                    if ($this->UsersComment->delete($comment)) {
+                        $this->Flash->success(__('The comment has been deleted.'));
+                    } else {
+                        $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
+                    }
+            }
+        }  
                return $this->redirect(['action' => 'postview',$uc_id]);
            }
+
+
+
+            //----------------------------Delete Post-----------------------//
+
+
+            public function deletepost($id = null ,$uc_id=null)
+            {
+             // die($userid);
+             $this->request->allowMethod(['post', 'delete']);
+             $post = $this->UsersPost->get($id);
+                // print_r($post);
+                // die;
+                if ($this->UsersPost->delete($post)) {
+                    $this->Flash->success(__('The Post has been deleted.'));
+                    return $this->redirect(['action' => 'view',$post->uc_id]);
+                } else {
+                    $this->Flash->error(__('The Post could not be deleted. Please, try again.'));
+                }
+        
+            }
+
+
+  public function saveUserAjax()
+    {
+        /** FILE CREATE */
+        $image_data = $this->request->getData('image_data');
+
+        $contents = $image_data;
+        $contents = explode('base64,', $contents);
+        $contents = base64_decode(str_replace(' ', '+', $contents[1]));
+        
+        
+        $f = finfo_open();
+        $mime_type = finfo_buffer($f, $contents, FILEINFO_MIME_TYPE);
+        $ext = $this->getFileExt($mime_type);
+        $unique = rand(9999, 99999).microtime();
+        $path = 'files/';
+        $path = WWW_ROOT . 'img' . DS. $unique.$ext;
+
+
+        $path = str_replace(" ", "", $path);
+        file_put_contents($path, $contents);
+
+        dd('here');
+
+        /** FILE CREATE END */
+        
+        $name = $this->request->getData('name');
+        $email = $this->request->getData('email');
+        $image = $this->request->getData('image');
+        //save these field into database using patchEntity
+        echo json_encode(array(
+            "status" => 200,
+            "message" => "Data Submitted Successfully",
+            "name" => $name,
+            "email" => $email,
+            "image" => $image,
+        ));
+        die;
+    }
+
+            
            
     }
 

@@ -146,6 +146,41 @@
                 <?php endif; ?>
             </div>
 
+            <div class="related">
+                <h4><?= __('All Posts') ?></h4>
+                <?php if (!empty($user->users_post)) : ?>
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th><?= __('Id') ?></th>
+                            <th><?= __('User Id') ?></th>
+                            <th><?= __('Title') ?></th>
+                            <th><?= __('Image') ?></th>
+                           
+                            <th class="actions"><?= __('Actions') ?></th>
+                        </tr>
+                        <?php foreach ($users as $posts) : ?>
+                        <tr>
+                            <td><?= h($posts->id) ?></td>
+                            <td><?= h($posts->uc_id) ?></td>
+                            <td><?= h($posts->post_name) ?></td>
+                            <td><?= h($posts->image) ?></td>
+                            
+                            <td class="actions">
+                                <?= $this->Html->link(__('View'), ['controller' => 'Users','action' => 'postview', $posts->id]) ?>
+                                <?= $this->Html->link(__('Edit'), ['controller' => 'Users', 'action' => 'edit', $posts->id]) ?>
+                                <!-- <?= $this->Html->link(__('Delete'), ['controller' => 'Users', 'action' => 'deletepost', $posts->id,$posts->uc_id]) ?> -->
+                                <?= $this->Form->postLink(_('Delete'), ['controller' => 'Users', 'action' => 'deletepost', $posts->id, $posts->uc_id], ['confirm' => _('Are you sure you want to delete # {0}?')]) ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
+                <?php endif; ?>
+            </div>
+
+     
+
                 
         
         </div>
